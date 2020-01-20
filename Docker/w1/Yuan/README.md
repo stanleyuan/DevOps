@@ -41,10 +41,10 @@
     - pid
     - user id
     - network
-- cgroup: resources management
-  - CPU
-  - memory
-  - IO
+  - cgroup: resources management
+    - CPU
+    - memory
+    - IO
 
 ### References
 
