@@ -188,4 +188,60 @@ CONTAINER ID        IMAGE               COMMAND             CREATED             
 7cd1c3d3f8a9        ubuntu:18.04        "/bin/bash"         18 seconds ago      Up 2 seconds                            docker-w1
 ```
 
-## See Hello World
+The container will exit immediately. The reason is Docker requires command(s) to keep running in the foreground. Otherwise, it thinks that application is stopped and it shutdown the container.
+
+It is required to allocate a tty and keep stdin opened (interactive).
+
+- [Docker container stop automatically after running](https://webkul.com/blog/docker-container-will-automatically-stop-run/)
+- [Why does container exit immediately?](https://www.reddit.com/r/docker/comments/8ip97p/why_does_container_exit_immediately/)
+
+```sh
+$ docker run -it ubuntu:18.04 /bin/bash
+# $ docker run -dit ubuntu:18.04 /bin/bash
+# $ docker run --rm -it ubuntu:18.04 /bin/bash
+
+$ docker ps
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+cae27cdca0c1        ubuntu:18.04        "/bin/bash"         17 hours ago        Up 17 hours                             docker-w1
+cf2b35f10e57        ubuntu:18.04        "/bin/bash"         18 hours ago        Up 18 hours                             distracted_feistel
+
+# in container
+$ apt update && apt install nginx
+
+$ service nginx start
+
+$ service nginx status
+ * nginx is running
+
+$ cat /etc/hosts
+127.0.0.1   localhost
+::1         localhost ip6-localhost ip6-loopback
+fe00::0     ip6-localnet
+ff00::0     ip6-mcastprefix
+ff02::1     ip6-allnodes
+ff02::2     ip6-allrouters
+172.17.0.2  a52350de4ffa
+```
+
+## See Hello World from the container
+
+In container:
+```sh
+$ cat "HelloWorld" > /var/www/html/helloworld.html
+```
+
+In local host:
+```sh
+$ ifconfig docker0
+docker0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 172.17.0.1  netmask 255.255.0.0  broadcast 172.17.255.255
+        inet6 fe80::42:17ff:feb9:5d15  prefixlen 64  scopeid 0x20<link>
+        ether 02:42:17:b9:5d:15  txqueuelen 0  (Ethernet)
+        RX packets 9964  bytes 648340 (648.3 KB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 28162  bytes 36818739 (36.8 MB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+$ curl 172.17.0.2/helloworld.html
+HelloWorld
+```
